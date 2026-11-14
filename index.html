@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do Applicatie</title>
+    <style>
+        /* CSS Variabelen voor Light en Dark Theme */
+        :root[data-theme="light"] {
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;A
+            --danger-color: #dc2626;
+            --danger-hover: #b91c1c;
+            --input-bg: #f8fafc;
+            --focus-ring: rgba(37, 99, 235, 0.2);
+        }
+
+        :root[data-theme="dark"] {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --primary-color: #3b82f6;
+            --primary-hover: #60a5fa;
+            --danger-color: #ef4444;
+            --danger-hover: #f87171;
+            --input-bg: #0f172a;
+            --focus-ring: rgba(59, 130, 246, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Desktop Container Layout */
+        .app-container {
+            width: 100%;
+            max-width: 850px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 600px;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .header-status {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Navigatie Tabs */
+        .tabs {
+            display: flex;
+            background-color: var(--bg-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 2rem;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .tab-btn:hover {
+            color: var(--text-color);
+        }
+
+        /* Content Area */
+        .content-area {
+            padding: 2rem;
+            flex-grow: 1;
+            overflow-y: auto;
+            max-height: 500px;
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* To-Do Formulier & Lijst */
+        .todo-input-group {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        input[type="text"], select {
+            flex-grow: 1;
+            padding: 0.75rem 1rem;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px var(--focus-ring);
+        }
+
+        button {
+            padding: 0.75rem 1.25rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger-hover);
+        }
+
+        .todo-list {
+            list-style: none;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            gap: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        .todo-item:last-child {
+            border-bottom: none;
+        }
+
+        .todo-item label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            flex-grow: 1;
+            word-break: break-word;
+        }
+
+        .todo-item input[type="checkbox"] {
+            width: 1.2rem;
+            height: 1.2rem;
+            cursor: pointer;
+            accent-color: var(--primary-color);
+        }
+
+        .todo-item.completed span {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .delete-btn:hover {
+            color: var(--danger-color);
+            background-color: var(--input-bg);
+        }
+
+        .todo-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2.5rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Instellingen Scherm */
+        .settings-section {
+            margin-bottom: 2rem;
+            background: var(--input-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .settings-section h3 {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            color: var(--text-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .settings-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+
+        .settings-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .settings-row label {
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .settings-section p, .settings-section pre {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .settings-section pre {
+            background-color: var(--card-bg);
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+            font-family: monospace;
+            margin-top: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <h1 id="appHeaderTitle">Mijn To-Do Lijst</h1>
+            <div class="header-status" id="headerStatus">0 van 0 voltooid</div>
+        </header>
+
+        <!-- Navigatie Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('todo')">Takenlijst</button>
+            <button class="tab-btn" onclick="switchTab('settings')">Instellingen</button>
+        </div>
+
+        <!-- Content Views -->
+        <div class="content-area">
+            
+            <!-- Tab 1: Werkscherm (To-Do Lijst) -->
+            <div id="todo-view" class="view active">
+                <div class="todo-input-group">
+                    <input type="text" id="todoInput" placeholder="Voeg een nieuwe taak toe..." autocomplete="off">
+                    <button id="addBtn">Toevoegen</button>
+                </div>
+                
+                <ul class="todo-list" id="todoList">
+                    <!-- Dynamische items -->
+                </ul>
+
+                <div class="todo-footer">
+                    <span id="tasksCountInfo" style="color: var(--text-muted); font-size: 0.9rem;"></span>
+                    <button class="btn-danger" id="clearBtn">Lijst Leegmaken</button>
+                </div>
+            </div>
+
+            <!-- Tab 2: Instellingen (Configuratie, README & MIT License) -->
+            <div id="settings-view" class="view">
+                
+                <!-- Configuratie Sectie -->
+                <div class="settings-section">
+                    <h3>Lijst Configuratie</h3>
+                    <div class="settings-row">
+                        <label for="configTitleInput">Lijst Titel:</label>
+                        <input type="text" id="configTitleInput" style="max-width: 300px;">
+                    </div>
+                    <div class="settings-row">
+                        <label for="configPlaceholderInput">Invoerveld Placeholder:</label>
+                        <input type="text" id="configPlaceholderInput" style="max-width: 300px;">
+                    </div>
+                    <div class="settings-row">
+                        <label for="themeSelect">Thema:</label>
+                        <select id="themeSelect" style="max-width: 300px;">
+                            <option value="light">Light Mode</option>
+                            <option value="dark">Dark Mode</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- README Sectie -->
+                <div class="settings-section">
+                    <h3>README</h3>
+                    <p>Welkom bij deze professionele desktop to-do applicatie. In het tabblad 'Takenlijst' kun je al je dagelijkse taken beheren, afvinken en de lijst in één keer leegmaken zodra je klaar bent.</p>
+                    <p style="margin-top: 0.5rem;">Via dit instellingenscherm kun je de applicatie volledig naar wens configureren (zoals de titel en het thema wijzigen). Alle data wordt automatisch opgeslagen in de lokale opslag van je browser.</p>
+                </div>
+
+                <!-- MIT License Sectie -->
+                <div class="settings-section">
+                    <h3>MIT License</h3>
+                    <pre>Copyright (c) 2026 To-Do App
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF THE USE OF THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.</pre>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // State management laden vanuit localStorage of defaults
+        let todos = JSON.parse(localStorage.getItem('todos')) || [
+            { id: 1, text: 'Verken de instellingen en pas het thema aan', completed: false },
+            { id: 2, text: 'Voeg je eigen taken toe aan de lijst', completed: true }
+        ];
+
+        let settings = JSON.parse(localStorage.getItem('appSettings')) || {
+            title: 'Mijn To-Do Lijst',
+            placeholder: 'Voeg een nieuwe taak toe...',
+            theme: 'light'
+        };
+
+        // DOM Elementen
+        const todoInput = document.getElementById('todoInput');
+        const addBtn = document.getElementById('addBtn');
+        const todoList = document.getElementById('todoList');
+        const clearBtn = document.getElementById('clearBtn');
+        const appHeaderTitle = document.getElementById('appHeaderTitle');
+        const headerStatus = document.getElementById('headerStatus');
+        const tasksCountInfo = document.getElementById('tasksCountInfo');
+        
+        // Instellingen DOM Elementen
+        const configTitleInput = document.getElementById('configTitleInput');
+        const configPlaceholderInput = document.getElementById('configPlaceholderInput');
+        const themeSelect = document.getElementById('themeSelect');
+
+        // Initialisatie
+        function initApp() {
+            applySettingsToUI();
+            renderTodos();
+        }
+
+        // Instellingen toepassen op UI
+        function applySettingsToUI() {
+            document.documentElement.setAttribute('data-theme', settings.theme);
+            appHeaderTitle.textContent = settings.title;
+            todoInput.placeholder = settings.placeholder;
+            
+            configTitleInput.value = settings.title;
+            configPlaceholderInput.value = settings.placeholder;
+            themeSelect.value = settings.theme;
+        }
+
+        // Tabs wisselen
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
+
+            if (tabName === 'todo') {
+                document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+                document.getElementById('todo-view').classList.add('active');
+            } else {
+                document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+                document.getElementById('settings-view').classList.add('active');
+            }
+        }
+
+        // To-Do lijst renderen
+        function renderTodos() {
+            todoList.innerHTML = '';
+            
+            if (todos.length === 0) {
+                todoList.innerHTML = '<div class="empty-state">Je lijst is momenteel leeg. Voeg hierboven een taak toe!</div>';
+                headerStatus.textContent = '0 van 0 voltooid';
+                tasksCountInfo.textContent = 'Geen actieve taken';
+                localStorage.setItem('todos', JSON.stringify(todos));
+                return;
+            }
+
+            const completedCount = todos.filter(t => t.completed).length;
+            headerStatus.textContent = `${completedCount} van ${todos.length} voltooid`;
+            tasksCountInfo.textContent = `Totaal aantal taken: ${todos.length} (${completedCount} afgerond)`;
+
+            todos.forEach(todo => {
+                const li = document.createElement('li');
+                li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+                li.innerHTML = `
+                    <label>
+                        <input type="checkbox" ${todo.completed ? 'checked' : ''} onchange="toggleTodo(${todo.id})">
+                        <span>${escapeHtml(todo.text)}</span>
+                    </label>
+                    <button class="delete-btn" onclick="deleteTodo(${todo.id})" title="Verwijder taak">&times;</button>
+                `;
+                todoList.appendChild(li);
+            });
+
+            localStorage.setItem('todos', JSON.stringify(todos));
+        }
+
+        // Taak toevoegen
+        function addTodo() {
+            const text = todoInput.value.trim();
+            if (!text) return;
+
+            todos.push({
+                id: Date.now(),
+                text: text,
+                completed: false
+            });
+
+            todoInput.value = '';
+            renderTodos();
+        }
+
+        // Taak afvinken / omkeren
+        function toggleTodo(id) {
+            todos = todos.map(todo => {
+                if (todo.id === id) {
+                    return { ...todo, completed: !todo.completed };
+                }
+                return todo;
+            });
+            renderTodos();
+        }
+
+        // Enkele taak verwijderen
+        function deleteTodo(id) {
+            todos = todos.filter(todo => todo.id !== id);
+            renderTodos();
+        }
+
+        // Hele lijst leegmaken
+        clearBtn.addEventListener('click', () => {
+            if (todos.length === 0) return;
+            if (confirm('Weet je zeker dat je de gehele lijst wilt leegmaken?')) {
+                todos = [];
+                renderTodos();
+            }
+        });
+
+        // Event listeners voor invoer
+        addBtn.addEventListener('click', addTodo);
+        todoInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addTodo();
+        });
+
+        // Event listeners voor instellingen configuratie (alles netjes in het instellingenscherm)
+        configTitleInput.addEventListener('input', (e) => {
+            settings.title = e.target.value || 'Mijn To-Do Lijst';
+            appHeaderTitle.textContent = settings.title;
+            localStorage.setItem('appSettings', JSON.stringify(settings));
+        });
+
+        configPlaceholderInput.addEventListener('input', (e) => {
+            settings.placeholder = e.target.value || 'Voeg een nieuwe taak toe...';
+            todoInput.placeholder = settings.placeholder;
+            localStorage.setItem('appSettings', JSON.stringify(settings));
+        });
+
+        themeSelect.addEventListener('change', (e) => {
+            settings.theme = e.target.value;
+            document.documentElement.setAttribute('data-theme', settings.theme);
+            localStorage.setItem('appSettings', JSON.stringify(settings));
+        });
+
+        // XSS preventie helper
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        // Start applicatie
+        initApp();
+    </script>
+</body>
+</html>
